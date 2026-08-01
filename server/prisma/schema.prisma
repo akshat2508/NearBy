@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Application-owned user, synced from Clerk on first authenticated request.
+// Clerk remains the identity provider only; this table is the source of
+// truth for anything the app needs beyond identity (location, algorithms,
+// friendships, chat, etc).
+model User {
+  id             String    @id @default(uuid())
+  clerkId        String    @unique
+  email          String    @unique
+  fullName       String?
+  avatarUrl      String?
+  bio            String?
+  latitude       Float?
+  longitude      Float?
+  // Geohash of (latitude, longitude) at GEOHASH_STORE_PRECISION (see
+  // algorithms/geohash.js). Indexed so nearby lookups can filter by prefix
+  // instead of scanning every discoverable row.
+  geohash        String?
+  isDiscoverable Boolean   @default(false)
+  lastActiveAt   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+  friendshipsAsA         Friendship[]    @relation("FriendshipUserA")
+  friendshipsAsB         Friendship[]    @relation("FriendshipUserB")
+  conversationsAsA       Conversation[]  @relation("ConversationUserA")
+  conversationsAsB       Conversation[]  @relation("ConversationUserB")
+  messages               Message[]       @relation("SentMessages")
+
+  @@index([geohash])
+  @@map("users")
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// A directional request from sender to receiver. On acceptance a
+// Friendship row is created and the request is left as ACCEPTED for
+// history; on rejection the row is deleted so either side can re-request.
+model FriendRequest {
+  id         String              @id @default(uuid())
+  senderId   String
+  receiverId String
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  sender   User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("friend_requests")
+}
+
+// Undirected friendship. userAId is always the lexicographically smaller
+// id (see utils/pairKey.js) so the pair has one canonical row regardless
+// of who sent the original request.
+model Friendship {
+  id        String   @id @default(uuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime @default(now())
+
+  userA User @relation("FriendshipUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("FriendshipUserB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+  @@map("friendships")
+}
+
+// One conversation per friend pair, created lazily on first message.
+// Same canonical-ordering convention as Friendship.
+model Conversation {
+  id            String    @id @default(uuid())
+  userAId       String
+  userBId       String
+  createdAt     DateTime  @default(now())
+  lastMessageAt DateTime?
+
+  userA    User      @relation("ConversationUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB    User      @relation("ConversationUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([userAId, userBId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
