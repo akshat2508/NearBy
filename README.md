@@ -81,3 +81,6 @@ to the same Clerk instance.
   relative `../../../` paths.
 - Every module follows routes → controller → service → repository →
   validation, as laid out in the original architecture brief.
+
+
+-- UI updation  needed in all Jsx files and proteted routes , and websocket implementation for the chat 
