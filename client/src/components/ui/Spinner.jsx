@@ -1,17 +1,26 @@
-import { cn } from "@/utils/cn";
-
-export default function Spinner({ className = "h-6 w-6" }) {
+export default function Spinner({ className = "" }) {
   return (
-    <div
-      role="status"
+    <svg
+      className={`h-5 w-5 animate-spin text-brand-600 ${className}`}
+      viewBox="0 0 24 24"
+      fill="none"
       aria-label="Loading"
-      className={cn(
-        "animate-spin rounded-full",
-        "border-2 border-surface-200",
-        "border-t-brand-700",
-        "shrink-0",
-        className
-      )}
-    />
+      role="status"
+    >
+      <circle
+        className="opacity-20"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      <path
+        d="M22 12a10 10 0 0 0-10-10"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

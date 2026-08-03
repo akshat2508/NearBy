@@ -21,13 +21,13 @@ export default function LandingPage() {
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col items-center px-6 py-28 text-center sm:py-36">
-      <span className="mb-5 rounded-full border border-surface-200 bg-surface-0 px-3 py-1 text-xs font-medium text-ink-600">
+      <span className="mb-5 rounded-full border border-surface-200 bg-surface-0 px-3 py-1 text-xs font-medium text-ink-600 shadow-soft">
         Now in early access
       </span>
-      <h1 className="text-4xl font-semibold tracking-tight text-ink-950 sm:text-5xl">
+      <h1 className="font-display text-4xl font-semibold tracking-tight text-ink-950 sm:text-5xl">
         Discover meaningful connections around you.
       </h1>
-      <p className="mt-5 max-w-xl text-base text-ink-600 sm:text-lg">
+      <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-600 sm:text-lg">
         Nearby helps you find and connect with people close to you, right now — no
         endless swiping, just proximity and genuine interest.
       </p>
