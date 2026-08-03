@@ -16,19 +16,4 @@ services:
       - server/.env
     ports:
       - "4000:4000"
-    depends_on:
-      - db
 
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: nearby
-      POSTGRES_PASSWORD: nearby
-      POSTGRES_DB: nearby
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-volumes:
-  db_data:
