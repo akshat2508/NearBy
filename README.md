@@ -84,3 +84,5 @@ to the same Clerk instance.
 
 
 -- UI updation  needed in all Jsx files and proteted routes , and websocket implementation for the chat 
+
+-- Additional search engine for the rankers algorithms/
